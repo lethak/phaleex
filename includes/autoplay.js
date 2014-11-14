@@ -99,7 +99,7 @@ phal.autoplay.solo.run = function()
 
 				// Trying to determine the next best suitable target ...
 				var nextTargetLeekId = null;
-				while(nextTargetLeekId===null || (nextTargetLeekId!==null && nextTargetLeekId!==false))
+				while(nextTargetLeekId===null)
 				{
 					nextTargetLeekId = phal.autoplay.solo.getNextTargetLeekId(myLeekId);
 				}
@@ -126,25 +126,32 @@ phal.autoplay.solo.run = function()
 
 phal.autoplay.solo.getNextTargetLeekId = function(myLeekId)
 {
+	var bestScoreLeekId = false;
+
 	if(phal.account.leekFightRemaining[''+myLeekId]<=0)
 		return false;
 
 	var ennemies = phal.garden.soloEnemyIdListByLeek[''+myLeekId];
 
+	var poolScore = {};
 	jQuery.each(ennemies, function(i,targetLeekId){
 
-		var poolScore = null;
 		if(typeof phal.leek.list[''+targetLeekId]=="undefined")
 		{
-			
+			phal.leek.query(targetLeekId);
 		}
 		else{
-			poolScore = phal.autoplay.getRulesetScore(phal.autoplay.profile.solo.ruleset, phal.leek.list[''+myLeekId], phal.leek.list[''+targetLeekId]);
+			poolScore[''+targetLeekId] = phal.autoplay.getRulesetScore(phal.autoplay.profile.solo.ruleset, phal.leek.list[''+myLeekId], phal.leek.list[''+targetLeekId]);
 		}
 
 	});
+	bestScoreLeekId = phal.autoplay.getBestScoreFromList(poolScore);
+	if(bestScoreLeekId==null)
+		bestScoreLeekId = false;;
 
-	return false;
+	phal.log('=== SCORES ===', 2);
+	phal.log(poolScore, 2);
+	return bestScoreLeekId;
 }
 
 phal.autoplay.getRulesetScore = function(ruleset, myItem, targetItem)
@@ -166,3 +173,16 @@ phal.autoplay.getRulesetScore = function(ruleset, myItem, targetItem)
 	return trueCount;
 };
 
+phal.autoplay.getBestScoreFromList = function(scoreListObject)
+{
+	var selectedKey = null;
+	var selectedScore = 0;
+	jQuery.each(scoreListObject, function(i,v){
+		if(v!==null && v>selectedScore)
+		{
+			selectedScore = v;
+			selectedKey = i;
+		}
+	});
+	return selectedKey;
+};

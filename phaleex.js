@@ -20,6 +20,7 @@ phantom.injectJs('includes/jquery.min.js');
 ##### Includes for PHALEEX CORE ##### */
 
 phantom.injectJs('includes/core.js');
+phantom.injectJs('includes/events.js');
 phantom.injectJs('includes/exec.js');
 phantom.injectJs('includes/profileManager.js');
 phantom.injectJs('includes/autoplay.js');
@@ -42,6 +43,7 @@ phantom.injectJs('leekwars/ref.chips.js');
 */
 phal.main = function()
 {
+
 	phal.exec.start();
 
 	// Loading profiles ...
@@ -59,13 +61,15 @@ phal.main = function()
 
 	// Authenticating ...
 	
-	phal.account.auth();
 
+	/**/
+	phal.account.auth();
 
 	phal.waitFor("phal.account.isAuthed", phal.garden.init);
 	phal.waitFor("phal.garden.isInit", phal.leek.init);
 	phal.waitFor("phal.leek.isInit", phal.autoplay.init);
 	phal.waitFor("phal.autoplay.isInit", phal.autoplay.solo.run);
+	/**/
 
 
 	// 59 minutes max runtime (ms)

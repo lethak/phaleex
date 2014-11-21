@@ -30,6 +30,18 @@ phal.garden.init = function()
 		phal.log("//(garden says)//   "+ m, 3);
 	};
 	phal.garden.page.onLoadFinished = function(){};
+	phal.garden.page.onError = function(msg, trace)
+	{
+		var msgStack = ['ERROR: ' + msg];
+		if (trace && trace.length)
+		{
+			msgStack.push('TRACE:');
+			trace.forEach(function(t) {
+				msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+			});
+		}
+		phal.log(msgStack.join('\n'),3);
+	};
 
 	phal.garden.query();
 };

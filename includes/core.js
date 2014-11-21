@@ -63,3 +63,18 @@ phal.waitFor = function(testFx, onReady, timeOutMillis)
             }
         }, 250); //< repeat check every 250ms
 };
+
+
+phantom.onError = function(msg, trace)
+{
+	var msgStack = ['PHANTOM ERROR: ' + msg];
+	if (trace && trace.length)
+	{
+		msgStack.push('TRACE:');
+		trace.forEach(function(t) {
+		msgStack.push(' -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function +')' : ''));
+		});
+	}
+	phal.log(msgStack.join('\n'), 0);
+	phantom.exit(1);
+};

@@ -19,6 +19,7 @@ phal.autoplay = {
 	isInit: false,
 	profile: null,
 	pending: false,
+	fightPage: null,
 	solo: {
 		finished: null,
 		interval: {},
@@ -29,7 +30,34 @@ phal.autoplay.init = function()
 {
 	if(!phal.autoplay.isInit)
 	{
+		// Active profile selection
 		phal.autoplay.profile = phal.profile.get(phal.exec.params.profile);
+
+		// Autofight init
+		phal.autoplay.fightPage = Object.create(phal.garden.page);
+		phal.autoplay.fightPage.onConsoleMessage = function(m)
+		{
+			phal.log("//(fightPage says)//   "+ m, 3);
+		};
+		phal.autoplay.fightPage.onLoadFinished = function(){};
+		phal.autoplay.fightPage.onError = function(msg, trace)
+		{
+			var msgStack = ['ERROR: ' + msg];
+			if (trace && trace.length)
+			{
+				msgStack.push('TRACE:');
+				trace.forEach(function(t) {
+					msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+				});
+			}
+			phal.log(msgStack.join('\n'),3);
+		};
+		phal.autoplay.fightPage.onUrlChanged = function(targetUrl) {
+			phal.log('!!!!!!!!!! New URL: ' + targetUrl);
+		};
+		phal.autoplay.fightPage.open(phal.exec.params.homeUrl, function(status){});
+		
+		//
 		phal.autoplay.isInit = true;
 	}
 };
@@ -45,6 +73,9 @@ phal.autoplay.solo.run = function()
 	}
 
 	phal.log('Starting autoplay.solo.run ...');
+
+	// Registering events
+	phal.events.get('autoplay-solo').on('nextSuitableTargetSelected', phal.autoplay.solo.event.nextSuitableTargetSelected);
 
 	// Determines what leek is playable based on the current profile.
 	var playableLeekIdList = [];
@@ -107,22 +138,31 @@ phal.autoplay.solo.run = function()
 				// No target deemed suitable
 				if(nextTargetLeekId===false || nextTargetLeekId===null || nextTargetLeekId===true){
 					phal.log('No target deemed suitable having '+phal.account.leekFightRemaining[''+myLeekId]+' fight remaining');
+					phal.events.get('autoplay-solo').trigger('nextSuitableTargetSelected', {myLeekId: myLeekId , targetLeekId: null});
 					return false;
 				}
 
 				phal.log('Next suitable target selected : '+phal.leek.list[''+nextTargetLeekId].name+' ('+nextTargetLeekId+')');
-
+				phal.events.get('autoplay-solo').trigger('nextSuitableTargetSelected', {myLeekId: myLeekId, targetLeekId: nextTargetLeekId });
 			}
 
 		},3500);
-
-
 
 	});
 
 
 };
 
+phal.autoplay.solo.event =
+{
+	nextSuitableTargetSelected: function(e, ea)
+	{
+		if(ea.targetLeekId===null || ea.myLeekId===null)
+			return false;
+
+		phal.autoplay.fightPage.evaluate(phal.leek.evaluate.challenge, ea.myLeekId, ea.targetLeekId);
+	}
+};
 
 phal.autoplay.solo.getNextTargetLeekId = function(myLeekId)
 {
@@ -186,3 +226,4 @@ phal.autoplay.getBestScoreFromList = function(scoreListObject)
 	});
 	return selectedKey;
 };
+

@@ -71,6 +71,19 @@ phal.leek.query = function(leekId, callback)
 	};
 	leekPage.onLoadFinished = function(){};
 
+	leekPage.onError = function(msg, trace)
+	{
+		var msgStack = ['ERROR: ' + msg];
+		if (trace && trace.length)
+		{
+			msgStack.push('TRACE:');
+			trace.forEach(function(t) {
+				msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+			});
+		}
+		phal.log(msgStack.join('\n'),3);
+	};
+
 	var url = phal.exec.params.leekUrl+'/'+leekId;
 	leekPage.open(url, function(status){
 		if (status === 'success')
@@ -104,6 +117,24 @@ phal.leek.onLoadedSucessfully = function(phantomPage, callback)
 
 phal.leek.evaluate = 
 {
+	challenge: function(myLeekId, targetLeekid) // Dry-run attack
+	{
+		console.log('!!! LeekwarsEntonoirEmbed.LeekContext.challenge', [myLeekId, targetLeekid]);
+		submitForm("garden_update", [
+			['leek_id', myLeekId],
+			['challenge_id', targetLeekid]
+		]);
+	},
+
+	attack: function(myLeekId, targetLeekid) // Garden attack
+	{
+		console.log('!!! LeekwarsEntonoirEmbed.LeekContext.attack', [myLeekId, targetLeekid]);
+		submitForm("garden_update", [
+			['leek_id', myLeekId],
+			['enemy_id', targetLeekid]
+		]);
+	},
+
 	datas: function()
 	{
 

@@ -23,6 +23,7 @@ phal.exec = {
 	stopRequested: false,
 	params: { // can be overrited as launch param
 		authUrl: 'http://leekwars.com/index.php?page=login_form',
+		homeUrl: 'http://leekwars.com',
 		gardenUrl: 'http://leekwars.com/garden',
 		leekUrl: 'http://leekwars.com/leek/',
 		verbose: 1, // ENUM(0,1,2,3)
@@ -35,7 +36,7 @@ phal.exec.getArgs = function()
 {
 	if (phal.exec.system.args.length === 1)
 	{
-		phal.log('Usage: phantomjs phaleex.js login=foo password=bar profile=baz');
+		phal.log('Usage: phantomjs phaleex.js login=foo password=bar [profile=baz] [verbose=1]');
 		phal.exec.stopSafe();
 		phantom.exit();
 	}

@@ -18,6 +18,7 @@ Most of all, its was a great way to learn the basics of phantomjs.
 
 ### Project Status
 
+* No more time to work actively on it.
 * Still not able to autoplay, almost here.
 * Profile system is almost implemented.
 * Auto upgrade system is not yet implemented.
